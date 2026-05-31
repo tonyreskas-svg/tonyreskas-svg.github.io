@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tomorr Rreshka · Technical Capability Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1e3c;
+    --navy-mid: #1a2f54;
+    --blue: #1d4ed8;
+    --blue-light: #3b82f6;
+    --accent: #f59e0b;
+    --accent-soft: #fef3c7;
+    --white: #ffffff;
+    --off: #f8f9fc;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --pill-bg: rgba(29,78,216,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--navy);
+    color: white;
+    padding: 80px 40px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.08;
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--blue-light);
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+
+  .hero-tag {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8);
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.5s forwards;
+  }
+
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: white;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  /* NAV */
+  .nav {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+  }
+
+  .nav a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 16px 18px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .nav a:hover { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* SECTIONS */
+  section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 14.5px;
+    max-width: 540px;
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+
+  /* PILLARS GRID */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .pillar {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s, transform 0.25s;
+    cursor: default;
+  }
+
+  .pillar:hover {
+    box-shadow: 0 8px 32px rgba(15,30,60,0.10);
+    transform: translateY(-2px);
+  }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .pillar.blue::before   { background: #3b82f6; }
+  .pillar.green::before  { background: #10b981; }
+  .pillar.amber::before  { background: #f59e0b; }
+  .pillar.purple::before { background: #8b5cf6; }
+  .pillar.rose::before   { background: #f43f5e; }
+  .pillar.teal::before   { background: #14b8a6; }
+
+  .pillar-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .pillar-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .pillar-ns {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
+  }
+
+  .pillar-items {
+    list-style: none;
+  }
+
+  .pillar-items li {
+    font-size: 12.5px;
+    color: var(--text);
+    padding: 5px 0;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .pillar-items li::before {
+    content: '↗';
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* CAPABILITY CARDS */
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .cap-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    transition: box-shadow 0.25s, transform 0.25s;
+  }
+
+  .cap-card:hover {
+    box-shadow: 0 6px 24px rgba(15,30,60,0.09);
+    transform: translateY(-2px);
+  }
+
+  .cap-card.wide {
+    grid-column: span 2;
+  }
+
+  .cap-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .cap-icon.blue   { background: #eff6ff; }
+  .cap-icon.green  { background: #f0fdf4; }
+  .cap-icon.amber  { background: #fffbeb; }
+  .cap-icon.purple { background: #f5f3ff; }
+  .cap-icon.rose   { background: #fff1f2; }
+
+  .cap-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .cap-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 14px;
+    font-weight: 300;
+  }
+
+  .cap-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .cap-tag {
+    background: var(--pill-bg);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .tl-item {
+    position: relative;
+    padding-bottom: 36px;
+  }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -28px; top: 6px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--blue);
+  }
+
+  .tl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .tl-role {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+  }
+
+  .tl-company {
+    font-size: 13px;
+    color: var(--blue);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .tl-points {
+    list-style: none;
+  }
+
+  .tl-points li {
+    font-size: 13.5px;
+    color: var(--muted);
+    padding: 3px 0 3px 14px;
+    position: relative;
+    font-weight: 300;
+  }
+
+  .tl-points li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--blue-light);
+    font-weight: 700;
+  }
+
+  /* CONTACT */
+  .contact-band {
+    background: var(--navy);
+    color: white;
+    padding: 60px 40px;
+  }
+
+  .contact-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .contact-inner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+  }
+
+  .contact-inner p {
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    font-weight: 300;
+    margin-top: 4px;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .contact-link:hover { background: rgba(255,255,255,0.16); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 640px) {
+    .pillars { grid-template-columns: 1fr; }
+    .cap-grid { grid-template-columns: 1fr; }
+    .cap-card.wide { grid-column: span 1; }
+    .hero { padding: 60px 24px 50px; }
+    section { padding: 48px 24px; }
+    .nav-inner { padding: 0 16px; overflow-x: auto; }
+    .hero-stats { gap: 24px; }
+    .contact-inner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Technical Capability Portfolio</div>
+    <h1>Tomorr <em>Rreshka</em></h1>
+    <div class="hero-sub">Director, Technical Development &amp; Service Capability &nbsp;·&nbsp; Cambridge, UK</div>
+    <div class="hero-tags">
+      <span class="hero-tag">Capability Frameworks</span>
+      <span class="hero-tag">LMS Governance</span>
+      <span class="hero-tag">Learning Infrastructure</span>
+      <span class="hero-tag">Communities of Practice</span>
+      <span class="hero-tag">Global Teams · US &amp; EU</span>
+      <span class="hero-tag">WorkRamp</span>
+      <span class="hero-tag">Autonomous Robotics</span>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-val">100+</div>
+        <div class="stat-label">Users across US &amp; EU</div>
+      </div>
+      <div>
+        <div class="stat-val">6</div>
+        <div class="stat-label">Capability pillars</div>
+      </div>
+      <div>
+        <div class="stat-val">25%</div>
+        <div class="stat-label">Fleet uptime uplift</div>
+      </div>
+      <div>
+        <div class="stat-val">7+</div>
+        <div class="stat-label">Years in tech leadership</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#framework">Framework</a>
+    <a href="#capability">Capability</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- FRAMEWORK SECTION -->
+<section id="framework">
+  <div class="reveal">
+    <div class="section-label">Capability Strategy</div>
+    <div class="section-title">Six-Pillar Technical Framework</div>
+    <div class="section-desc">A capability strategy built from scratch — defining north star metrics and measurable sub-capabilities across the full service engineering lifecycle for a global technical workforce.</div>
+  </div>
+  <div class="pillars reveal">
+    <div class="pillar blue">
+      <div class="pillar-icon">⚙️</div>
+      <div class="pillar-title">Operational Excellence</div>
+      <div class="pillar-ns">NS · Refurbishment cycle time · SBD rate</div>
+      <ul class="pillar-items">
+        <li>SBD — drives refurb cycle &amp; buffer sizing</li>
+        <li>Refurbishment throughput vs target</li>
+        <li>Service buffer coverage</li>
+        <li>On-time deployment rate</li>
+      </ul>
+    </div>
+    <div class="pillar green">
+      <div class="pillar-icon">🔬</div>
+      <div class="pillar-title">Reliability Engineering</div>
+      <div class="pillar-ns">NS · MDBF · First-time fix rate</div>
+      <ul class="pillar-items">
+        <li>Diagnostics — reduces MTTR &amp; repeat failures</li>
+        <li>Mean distance between failures</li>
+        <li>Preventive maintenance failure rate</li>
+        <li>Recurrence rate of known faults</li>
+      </ul>
+    </div>
+    <div class="pillar amber">
+      <div class="pillar-icon">💰</div>
+      <div class="pillar-title">Financial Efficiency</div>
+      <div class="pillar-ns">NS · Cost per refurb unit · Spare parts cost</div>
+      <ul class="pillar-items">
+        <li>Parts cost as % of refurb cost</li>
+        <li>Swap time &amp; unit cost vs repair</li>
+        <li>Active fleet % at any time</li>
+        <li>Labour hours per refurb</li>
+      </ul>
+    </div>
+    <div class="pillar purple">
+      <div class="pillar-icon">📊</div>
+      <div class="pillar-title">Tooling &amp; Data</div>
+      <div class="pillar-ns">NS · Reporting coverage % · Dashboard adoption</div>
+      <ul class="pillar-items">
+        <li>Jira ticket-to-resolution cycle time</li>
+        <li>KPI dashboards with live data feeds</li>
+        <li>Field data capture rate</li>
+        <li>Report delivery vs SLA</li>
+      </ul>
+    </div>
+    <div class="pillar rose">
+      <div class="pillar-icon">🚀</div>
+      <div class="pillar-title">Strategic Scaling</div>
+      <div class="pillar-ns">NS · Fleet uptime · Scaling milestone hit rate</div>
+      <ul class="pillar-items">
+        <li>US servicing model — defined &amp; validated</li>
+        <li>Waterfall / hub-spoke network efficiency</li>
+        <li>EU/US capacity vs deployment demand</li>
+        <li>Grocery servicing readiness milestone</li>
+      </ul>
+    </div>
+    <div class="pillar teal">
+      <div class="pillar-icon">🔗</div>
+      <div class="pillar-title">Cross-Functional Integration</div>
+      <div class="pillar-ns">NS · Feedback loop velocity · Ops alignment score</div>
+      <ul class="pillar-items">
+        <li>Joint OKR coverage %</li>
+        <li>Obs-to-change logged (days)</li>
+        <li>Parts availability vs demand</li>
+        <li>Field engineering insights actioned/quarter</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CAPABILITY SECTION -->
+<section id="capability">
+  <div class="reveal">
+    <div class="section-label">Learning Infrastructure</div>
+    <div class="section-title">What I Build &amp; Own</div>
+    <div class="section-desc">A full-stack capability ecosystem — from content design and LMS governance to live training delivery and community programmes.</div>
+  </div>
+  <div class="cap-grid">
+    <div class="cap-card reveal">
+      <div class="cap-icon blue">📘</div>
+      <div class="cap-title">Technical Toolbox</div>
+      <div class="cap-desc">Designed end-to-end: architecture, diagnostic logic, knowledge structure, and delivery standards. Product engineering builds to my specification. Serves 100+ users across US and EU.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">Capability Framework</span>
+        <span class="cap-tag">Knowledge Architecture</span>
+        <span class="cap-tag">Point-of-need Delivery</span>
+      </div>
+    </div>
+    <div class="cap-card reveal">
+      <div class="cap-icon green">🎓</div>
+      <div class="cap-title">WorkRamp LMS</div>
+      <div class="cap-desc">Full governance and administration of the LMS — certifications, power tool sign-off compliance, structured onboarding, data integrity, and capability tracking across two regions.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">LMS Governance</span>
+        <span class="cap-tag">Certifications</span>
+        <span class="cap-tag">Compliance</span>
+      </div>
+    </div>
+    <div class="cap-card reveal">
+      <div class="cap-icon amber">📡</div>
+      <div class="cap-title">RSE Team · Remote Support Engineers</div>
+      <div class="cap-desc">Lead a team of 2 Remote Support Engineers providing live technical training and guidance to field technicians across US and EU — real-time capability delivery at scale.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">Live Training Delivery</span>
+        <span class="cap-tag">Global Coverage</span>
+        <span class="cap-tag">Technical Mentoring</span>
+      </div>
+    </div>
+    <div class="cap-card reveal">
+      <div class="cap-icon purple">🤝</div>
+      <div class="cap-title">Communities of Practice</div>
+      <div class="cap-desc">Established and run cross-regional knowledge-sharing sessions bringing together field technicians and internal design engineers for continuous capability exchange across US and EU.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">Knowledge Sharing</span>
+        <span class="cap-tag">Cross-regional</span>
+        <span class="cap-tag">Engineering Communities</span>
+      </div>
+    </div>
+    <div class="cap-card reveal">
+      <div class="cap-icon rose">🎓</div>
+      <div class="cap-title">University Robotics Pilot</div>
+      <div class="cap-desc">Designed and launched a programme embedding robotics engineering students on a zero-hours model. Successfully reduced seasonal permanent headcount costs while building a pipeline of technical talent.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">Early Careers</span>
+        <span class="cap-tag">University Partnership</span>
+        <span class="cap-tag">Workforce Planning</span>
+      </div>
+    </div>
+    <div class="cap-card reveal">
+      <div class="cap-icon blue">🛠️</div>
+      <div class="cap-title">Tooling &amp; Platform Ownership</div>
+      <div class="cap-desc">Own tooling selection and governance across the capability stack. Worked directly with Atlassian specialists on Jira development. Evaluate and procure internal and external platforms.</div>
+      <div class="cap-tags">
+        <span class="cap-tag">WorkRamp</span>
+        <span class="cap-tag">Jira · Confluence</span>
+        <span class="cap-tag">Vendor Management</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXPERIENCE SECTION -->
+<section id="experience">
+  <div class="reveal">
+    <div class="section-label">Career</div>
+    <div class="section-title">Experience</div>
+    <div class="section-desc">7+ years progressing from hands-on engineering to strategic capability leadership inside high-growth autonomous robotics and logistics organisations.</div>
+  </div>
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <div class="tl-date">May 2024 – Present</div>
+      <div class="tl-role">Director, Servicing Engineering <span style="font-weight:300;color:var(--muted);">(fmr. Service Capability)</span></div>
+      <div class="tl-company">Starship Technologies · Cambridge, UK</div>
+      <ul class="tl-points">
+        <li>Designed and own the Technical Toolbox capability framework — architecture, diagnostics logic, delivery standards</li>
+        <li>Govern WorkRamp LMS across certifications, onboarding, compliance and capability data integrity</li>
+        <li>Lead RSE team providing live training and technical guidance to 100+ users across US and EU</li>
+        <li>Run cross-regional knowledge-sharing communities with technicians and design engineers</li>
+        <li>Launched university robotics pilot on zero-hours model to solve seasonal demand spikes</li>
+        <li>Present capability strategy and ROI to SVP of Operations (SLT)</li>
+      </ul>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Dec 2022 – May 2024</div>
+      <div class="tl-role">Product Engineer</div>
+      <div class="tl-company">Starship Technologies · Cambridge, UK</div>
+      <ul class="tl-points">
+        <li>Improved product delivery efficiency by 35% across 5 cross-functional teams</li>
+        <li>Delivered structured technical guidance and handoff support to service and maintenance teams</li>
+        <li>Enhanced hardware/software integration; improved system compliance by 10%</li>
+      </ul>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Sep 2021 – Dec 2022</div>
+      <div class="tl-role">Robot Service Team Lead</div>
+      <div class="tl-company">Starship Technologies · Milton Keynes, UK</div>
+      <ul class="tl-points">
+        <li>Led and developed high-performing service team with structured training programmes</li>
+        <li>Boosted fleet uptime 20% and operational efficiency 15% through data-driven strategy</li>
+      </ul>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">May 2018 – Jun 2021</div>
+      <div class="tl-role">Operations Manager · Test Coordinator · Support Engineer</div>
+      <div class="tl-company">Amazon · Cambridge, UK</div>
+      <ul class="tl-points">
+        <li>Directed multi-site programme initiatives; increased decision-making efficiency by 20%</li>
+        <li>Designed test management approach with structured team training across 15 projects</li>
+      </ul>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top: 32px; padding: 20px 24px; background: white; border: 1px solid var(--border); border-radius: 10px; display: inline-flex; gap: 32px; flex-wrap: wrap;">
+    <div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Education</div>
+      <div style="font-weight:600;font-size:14px;color:var(--navy);">BSc Mechanical Engineering</div>
+      <div style="font-size:13px;color:var(--muted);font-weight:300;">University of Western Macedonia</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Methodology</div>
+      <div style="font-weight:600;font-size:14px;color:var(--navy);">Lean Six Sigma · PRINCE2 Foundation</div>
+      <div style="font-size:13px;color:var(--muted);font-weight:300;">Continuous improvement mindset</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div class="contact-band" id="contact">
+  <div class="contact-inner">
+    <div>
+      <h2>Let's connect</h2>
+      <p>Open to strategic capability and technical development leadership roles</p>
+    </div>
+    <div class="contact-links">
+      <a href="mailto:tonyreskas@gmail.com" class="contact-link">✉ tonyreskas@gmail.com</a>
+      <a href="https://linkedin.com/in/tony-rreshka" target="_blank" class="contact-link">in LinkedIn</a>
+      <a href="tel:07497388205" class="contact-link">📞 07497 388 205</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
