@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tony Reska · Operating models and capacity planning</title>
+<meta name="description" content="Operating models, capacity planning and portfolio metrics for engineering organisations. Cambridge, UK.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F5; --surface:#FFFFFF; --ink:#16202A; --muted:#5B6670; --rule:#D5DBDA;
+  --accent:#0B6E6E; --accent-soft:#D7EBEA; --ok:#2E7D52; --ok-soft:#DCEFE3; --warn:#A86F00; --warn-soft:#F6EACB;
+  --sans:"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10171D; --surface:#172129; --ink:#E6ECEE; --muted:#9AA7AF; --rule:#2B3842;
+    --accent:#4FB8B3; --accent-soft:#16383A; --ok:#6CC596; --ok-soft:#173327; --warn:#E3AE4A; --warn-soft:#3A2E14;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10171D; --surface:#172129; --ink:#E6ECEE; --muted:#9AA7AF; --rule:#2B3842;
+  --accent:#4FB8B3; --accent-soft:#16383A; --ok:#6CC596; --ok-soft:#173327; --warn:#E3AE4A; --warn-soft:#3A2E14;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px); -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.55; font-feature-settings:"tnum" 1}
+a{color:var(--accent); text-underline-offset:3px}
+a:focus-visible, button:focus-visible{outline:3px solid var(--accent); outline-offset:3px; border-radius:4px}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px}
+
+/* header */
+header.top{padding:56px 0 8px}
+header.top.hero-band{padding:64px 0 48px}
+.name{font-size:clamp(2.1rem,5vw,3.2rem); font-weight:700; letter-spacing:-.02em; line-height:1.05; margin:0}
+.role{font-size:1.05rem; color:var(--muted); margin:10px 0 0; font-weight:500}
+.statement{font-family:var(--serif); font-size:clamp(1.3rem,2.6vw,1.75rem); line-height:1.4; max-width:34em; margin:28px 0 0}
+.contact{display:flex; flex-wrap:wrap; gap:8px 20px; margin:22px 0 0; padding:0; list-style:none; font-weight:500}
+
+/* sections */
+section{padding:56px 0 8px}
+h2{font-size:1.45rem; letter-spacing:-.01em; margin:0 0 6px}
+.lede{color:var(--muted); max-width:62ch; margin:0 0 24px}
+
+/* schedule */
+.schedule{background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:22px 22px 18px}
+.sched-scroll{overflow-x:auto}
+.sched{min-width:640px}
+.axis,.row{display:grid; grid-template-columns:230px 1fr; align-items:center}
+.axis .ticks{position:relative; height:22px; border-bottom:1px solid var(--rule)}
+.axis .tick{position:absolute; bottom:4px; font-size:.78rem; color:var(--muted); transform:translateX(-50%)}
+.row{min-height:52px; border-bottom:1px dashed var(--rule)}
+.row:last-child{border-bottom:0}
+.row .label{font-size:.9rem; line-height:1.25; padding-right:14px}
+.row .label b{display:block; font-weight:600}
+.row .label span{color:var(--muted); font-size:.8rem}
+.track{position:relative; height:52px; background-image:linear-gradient(to right, var(--rule) 1px, transparent 1px); background-size:calc(100% / 8.75) 100%}
+.bar{position:absolute; top:13px; height:26px; border:0; border-radius:5px; background:var(--accent-soft); color:var(--accent); font:600 .8rem var(--sans); text-align:left; padding:0 10px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transform-origin:left center; box-shadow:inset 0 0 0 1.5px var(--accent)}
+.bar[aria-pressed="true"]{background:var(--accent); color:var(--surface)}
+.bar.current::after{content:""; position:absolute; right:0; top:0; bottom:0; width:10px; background:repeating-linear-gradient(135deg, transparent 0 3px, currentColor 3px 4px); opacity:.5}
+.today{position:absolute; top:-4px; bottom:-4px; width:0; border-left:2px solid var(--warn)}
+.today-label{position:absolute; top:-26px; transform:translateX(-50%); font-size:.72rem; font-weight:600; color:var(--warn)}
+@media (prefers-reduced-motion:no-preference){
+  .bar{animation:grow .7s cubic-bezier(.2,.7,.2,1) both; animation-delay:calc(var(--i) * 140ms)}
+  @keyframes grow{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+}
+.detail{margin-top:18px; padding-top:18px; border-top:1px solid var(--rule)}
+.detail > div{max-width:70ch}
+.detail h3{margin:0; font-size:1.15rem}
+.detail .meta{color:var(--muted); font-size:.9rem; margin:2px 0 12px}
+.detail ul{margin:0; padding-left:1.1em}
+.detail li{margin:0 0 6px}
+.hint{font-size:.82rem; color:var(--muted); margin:10px 0 0}
+
+/* tables */
+.tbl-scroll{overflow-x:auto; background:var(--surface); border:1px solid var(--rule); border-radius:10px}
+table{border-collapse:collapse; width:100%; min-width:640px}
+th,td{text-align:left; vertical-align:top; padding:14px 16px; border-bottom:1px solid var(--rule); font-size:.95rem}
+tr:last-child td{border-bottom:0}
+thead th{font-size:.85rem; color:var(--muted); font-weight:600; background:transparent}
+td:first-child{font-weight:600; width:28%}
+.status{display:inline-block; font-size:.8rem; font-weight:600; padding:2px 9px; border-radius:99px; white-space:nowrap}
+.status.ok{background:var(--ok-soft); color:var(--ok)}
+.status.tr{background:var(--warn-soft); color:var(--warn)}
+td .ns{font-weight:600}
+td .sub{color:var(--muted)}
+
+/* bottom */
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:28px}
+.pair dl{margin:0}
+.pair dt{font-weight:600; margin-top:12px}
+.pair dt:first-child{margin-top:0}
+.pair dd{margin:2px 0 0; color:var(--muted)}
+footer{margin-top:64px; border-top:1px solid var(--rule); padding:32px 0 48px}
+footer p{margin:0 0 12px; font-family:var(--serif); font-size:1.3rem}
+
+@media (max-width:760px){
+  .wrap{padding:0 18px}
+  header.top{padding-top:36px}
+  .pair{grid-template-columns:1fr; gap:18px}
+  .schedule{padding:18px 14px 14px}
+  .sched{min-width:0}
+  .axis,.row{grid-template-columns:118px 1fr}
+  .row .label{font-size:.82rem; padding-right:8px}
+  .bar{font-size:0; padding:0}
+  .tick.odd{display:none}
+}
+
+/* ---- colour layer ---- */
+html,body{overflow-x:clip}
+:root{--hero:#0E1B2E; --hero-ink:#EAF1F7; --hero-muted:#9FB2C6; --hero-accent:#5CC8C2; --gold:#E0A83A}
+.hero-band{position:relative; background:var(--hero); color:var(--hero-ink); box-shadow:0 0 0 100vmax var(--hero); clip-path:inset(0 -100vmax); padding:64px 0 48px; margin-bottom:8px}
+.hero-band::after{content:""; position:absolute; inset:0; background:radial-gradient(closest-side at 72% 35%, rgba(92,200,194,.16), transparent); pointer-events:none}
+.hero-band > *{position:relative; z-index:1}
+.eyebrow{font-size:.78rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 14px}
+.hero-band .name span{color:var(--hero-accent)}
+.hero-band .role{color:var(--hero-muted)}
+.hero-band .contact a{color:var(--hero-ink); text-decoration-color:var(--hero-accent)}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 0; padding:0; list-style:none}
+.chips li{border:1px solid rgba(234,241,247,.22); background:rgba(234,241,247,.06); border-radius:99px; padding:5px 13px; font-size:.85rem; color:var(--hero-ink)}
+section h2::before{content:attr(data-eyebrow); display:block; font-size:.74rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+.p1{--pc:#3B82F6}.p2{--pc:#10A37F}.p3{--pc:#E0A83A}.p4{--pc:#8B5CF6}.p5{--pc:#E4572E}.p6{--pc:#0EA5B7}
+tr[class^="p"] td:first-child{border-left:4px solid var(--pc); color:var(--pc)}
+tr[class^="p"] td.ns{color:var(--ink)}
+.bar.amz{background:#FCEFD6; color:#8A5A00; box-shadow:inset 0 0 0 1.5px #E0A83A}
+.bar.amz[aria-pressed="true"]{background:#E0A83A; color:#1b1300}
+footer.band{background:var(--hero); color:var(--hero-ink); box-shadow:0 0 0 100vmax var(--hero); clip-path:inset(0 -100vmax); border-top:0; padding:44px 0 56px}
+footer.band a{color:var(--hero-ink); text-decoration-color:var(--hero-accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bar.amz{background:#3A2E14; color:#E3AE4A}}
+
+tr.grp th{background:var(--accent-soft); color:var(--accent); font-size:.78rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:9px 16px; text-align:left}
+mark.pm{background:var(--accent-soft); color:var(--accent); font-weight:600; padding:1px 5px; border-radius:4px; box-decoration-break:clone; -webkit-box-decoration-break:clone}
+.work{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:22px}
+.case{background:var(--surface); border:1px solid var(--rule); border-top:4px solid var(--pc); border-radius:10px; padding:20px 20px 18px; display:grid; grid-row:span 4; grid-template-rows:subgrid; row-gap:10px}
+.case h3{margin:0 0 2px; font-size:1.08rem; line-height:1.3}
+.case dl{display:contents}
+.case dt{font-size:.74rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.case dd{margin:2px 0 0; font-size:.93rem; line-height:1.5}
+.case .out{padding-top:12px; border-top:1px solid var(--rule)}
+.case .out dt{color:var(--pc)}
+.case .out dd{font-weight:600}
+@media (max-width:900px){ .work{grid-template-columns:1fr} .case{grid-row:auto; grid-template-rows:auto} }
+
+/* ---- capacity model ---- */
+:root{--s-fund:#2a78d6; --s-def:#eb6834; --ink2:#52514e; --grid:#e1e0d9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--s-fund:#3987e5; --s-def:#d95926; --ink2:#c3c2b7; --grid:#2b3842}}
+:root[data-theme="dark"]{--s-fund:#3987e5; --s-def:#d95926; --ink2:#c3c2b7; --grid:#2b3842}
+.model{background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:22px; margin-top:22px}
+.controls{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; padding-bottom:20px; border-bottom:1px solid var(--rule)}
+.ctl label{display:block; font-size:.82rem; font-weight:600; margin-bottom:6px}
+.ctl output{float:right; font-weight:600; color:var(--accent); font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%; accent-color:var(--accent)}
+.ctl select{width:100%; font:inherit; font-size:.88rem; padding:6px 8px; border:1px solid var(--rule); border-radius:6px; background:var(--surface); color:var(--ink)}
+.ctl .help{font-size:.76rem; color:var(--muted); margin:4px 0 0}
+.seg{display:flex; border:1px solid var(--rule); border-radius:6px; overflow:hidden}
+.seg button{flex:1; font:inherit; font-size:.8rem; padding:6px 4px; border:0; background:transparent; color:var(--ink); cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--surface); font-weight:600}
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:18px 0}
+.kpi b{display:block; font-size:1.6rem; line-height:1.1; font-variant-numeric:tabular-nums}
+.kpi span{font-size:.8rem; color:var(--muted)}
+.verdict{background:var(--accent-soft); border-radius:8px; padding:12px 14px; font-size:.95rem; margin:0 0 16px}
+.chart-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px}
+.chart-head h3{margin:0; font-size:1rem}
+.legend{display:flex; gap:16px; font-size:.82rem; color:var(--ink2); list-style:none; margin:0; padding:0}
+.legend li{display:flex; align-items:center; gap:6px}
+.legend i{width:12px; height:12px; border-radius:3px; display:inline-block}
+.chart-wrap{position:relative; margin-top:8px}
+.chart-wrap svg{width:100%; height:auto; display:block}
+.chart-wrap .tick{font-size:11px; fill:var(--muted)}
+.chart-wrap .cap-label{font-size:11px; font-weight:600; fill:var(--ink)}
+.chart-wrap .hit{fill:transparent; cursor:default}
+.chart-wrap .hit:focus{outline:none}
+.chart-wrap .hit:focus-visible + .ring, .chart-wrap .hit:hover + .ring{stroke:var(--ink); stroke-width:1.5}
+.tip{position:absolute; pointer-events:none; background:var(--ink); color:var(--surface); font-size:.8rem; padding:8px 10px; border-radius:6px; line-height:1.45; white-space:nowrap; opacity:0; transform:translate(-50%,-100%); transition:opacity .12s}
+.tip.on{opacity:1}
+.model table{min-width:620px; margin-top:6px}
+.model td,.model th{padding:9px 12px; font-size:.88rem}
+.model td:first-child{width:auto}
+.st{display:inline-flex; align-items:center; gap:6px; font-weight:600}
+.st i{width:10px; height:10px; border-radius:2px; display:inline-block}
+.note{font-size:.78rem; color:var(--muted); margin:12px 0 0}
+@media (max-width:860px){ .controls{grid-template-columns:1fr 1fr} .kpis{grid-template-columns:1fr 1fr} }
+@media (max-width:520px){ .controls{grid-template-columns:1fr} .model{padding:16px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top hero-band">
+  <p class="eyebrow">Portfolio · Capacity · Operating models</p>
+  <h1 class="name">Tony <span>Reska</span></h1>
+  <p class="role">Director, Servicing Engineering · Operating models, capacity planning and portfolio governance · Cambridge, UK</p>
+  <p class="statement">I turn strategy into operating models: the frameworks, capacity plans and metrics that leaders use to decide where effort and investment go next.</p>
+  <ul class="chips">
+    <li>Operating models</li><li>Capacity &amp; scenario planning</li><li>Business cases</li><li>Portfolio governance</li><li>Executive reporting</li><li>AI-enabled insight</li><li>Databricks</li><li>Tableau</li>
+  </ul>
+  <ul class="contact">
+    <li><a href="mailto:tonyreskas@gmail.com">tonyreskas@gmail.com</a></li>
+    <li><a href="tel:+447497388205">07497 388 205</a></li>
+    <li><a href="https://linkedin.com/in/tony-rreshka">LinkedIn</a></li>
+  </ul>
+</header>
+
+<section aria-labelledby="work-h">
+  <h2 id="work-h" data-eyebrow="Selected work">Three pieces of work that show how I operate</h2>
+  <p class="lede">Each one started with a planning or decision problem and ended with a measurable change in how the business runs.</p>
+  <div class="work">
+    <article class="case p1">
+      <h3>An operating model built from scratch</h3>
+      <dl>
+        <div><dt>The problem</dt><dd>Servicing Engineering had data in several systems but no shared way to decide where effort and investment should go.</dd></div>
+        <div><dt>What I did</dt><dd>Designed a six-pillar framework with a north star and supporting metrics per pillar, set the governance rhythm, and took performance, priorities and ROI to the SVP of Operations on a regular cadence.</dd></div>
+        <div class="out"><dt>Outcome</dt><dd>The framework is now the basis for how the function prioritises resources and investment.</dd></div>
+      </dl>
+    </article>
+    <article class="case p2">
+      <h3>Predictive failure detection</h3>
+      <dl>
+        <div><dt>The problem</dt><dd>Software and hardware issues surfaced only after robots failed in the field, driving spare parts cost, taking robots out of service, and reaching product teams too late to shape the next release.</dd></div>
+        <div><dt>What I did</dt><dd>Led a tool that uses robot telemetry and historical fleet data to flag issues before they cause failures, so the team could act before robots left service.</dd></div>
+        <div class="out"><dt>Outcome</dt><dd>~20% lower spare parts cost and ~15% higher fleet utilisation, with improved reliability.</dd></div>
+      </dl>
+    </article>
+    <article class="case p4">
+      <h3>The Technical Toolbox programme</h3>
+      <dl>
+        <div><dt>The problem</dt><dd>Field technicians across two regions had no consistent diagnostic platform or knowledge at the point of need.</dd></div>
+        <div><dt>What I did</dt><dd>Ran it from requirements to deployment: specification, plan, budget and API integrations, with 3 software and 3 servicing engineers over about 12 months.</dd></div>
+        <div class="out"><dt>Outcome</dt><dd>Rolled out to 100+ technicians across the US and EU.</dd></div>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="model-h">
+  <h2 id="model-h" data-eyebrow="Interactive">Try it: a capacity scenario model</h2>
+  <p class="lede">A small model of how I plan engineering capacity across a portfolio. Change capacity, demand, timing or the prioritisation rule and see what gets funded, what slips, and why. All figures are illustrative.</p>
+  <div class="model">
+    <div class="controls">
+      <div class="ctl"><label for="cap">Engineering capacity <output id="capOut" for="cap"></output></label><input type="range" id="cap" min="10" max="40" step="1" value="22"><p class="help">Full-time engineers available per quarter</p></div>
+      <div class="ctl"><label for="dem">Demand change <output id="demOut" for="dem"></output></label><input type="range" id="dem" min="-20" max="40" step="5" value="0"><p class="help">Effort above or below the original estimates</p></div>
+      <div class="ctl"><label for="dly">Delay an initiative</label><select id="dly"></select><div class="seg" id="dlyQ" role="group" aria-label="Delay length" style="margin-top:6px"><button type="button" data-q="1" aria-pressed="true">+1 qtr</button><button type="button" data-q="2" aria-pressed="false">+2 qtrs</button></div></div>
+      <div class="ctl"><label id="ruleL">Prioritise by</label><div class="seg" id="rule" role="group" aria-labelledby="ruleL"><button type="button" data-r="score" aria-pressed="true">Value-led</button><button type="button" data-r="value" aria-pressed="false">Value only</button><button type="button" data-r="fifo" aria-pressed="false">As requested</button></div><p class="help">Value-led weighs value, delivery risk and effort</p></div>
+    </div>
+    <div class="kpis" aria-live="polite">
+      <div class="kpi"><b id="kFund"></b><span>Initiatives funded</span></div>
+      <div class="kpi"><b id="kVal"></b><span>Portfolio value delivered</span></div>
+      <div class="kpi"><b id="kUtil"></b><span>Peak capacity used</span></div>
+      <div class="kpi"><b id="kGap"></b><span>Extra capacity to fund everything</span></div>
+    </div>
+    <p class="verdict" id="verdict" aria-live="polite"></p>
+    <div class="chart-head"><h3>Engineering demand vs capacity by quarter (FTE)</h3>
+      <ul class="legend"><li><i style="background:var(--s-fund)"></i>Funded</li><li><i style="background:var(--s-def)"></i>Deferred</li><li><i style="background:none;border-top:2px dashed var(--ink);height:0;width:14px;border-radius:0"></i>Capacity</li></ul></div>
+    <div class="chart-wrap" id="chart"><div class="tip" id="tip" role="tooltip"></div></div>
+    <div class="tbl-scroll" style="border:0;margin-top:14px">
+      <table><thead><tr><th scope="col">Rank</th><th scope="col">Initiative</th><th scope="col">Quarters</th><th scope="col">FTE / qtr</th><th scope="col">Value</th><th scope="col">Risk</th><th scope="col">Score</th><th scope="col">Status</th></tr></thead><tbody id="rows"></tbody></table>
+    </div>
+    <p class="note">Score = value × risk factor (low 1.0, medium 0.85, high 0.7) ÷ total effort. An initiative is funded only if capacity exists in every quarter it runs, as a commitment would be.</p>
+  </div>
+</section>
+
+<section aria-labelledby="sched-h">
+  <h2 id="sched-h" data-eyebrow="Timeline">Career, 2018 to today</h2>
+  <p class="lede">Eight years across Amazon and Starship Technologies, which builds and operates autonomous delivery robots across the US and Europe. From test coordination to setting strategy and operating model for an engineering function. Select a bar to see what was delivered.</p>
+  <div class="schedule">
+    <div class="sched-scroll">
+      <div class="sched" id="sched"></div>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<section aria-labelledby="fit-h">
+  <h2 id="fit-h" data-eyebrow="Fit to the role">Roadmaps, capacity and portfolio: where I've done the work</h2>
+  <p class="lede">The requirements I'm most often asked about for portfolio and planning roles, and the evidence behind each.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th scope="col">What the role needs</th><th scope="col">Evidence</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr class="grp"><th colspan="3" scope="colgroup">Required</th></tr>
+        <tr><td>Set a vision, build capability, lead a team, deliver measurable outcomes</td><td>Built Servicing Engineering's operating model from scratch and lead a multidisciplinary team across the US and EU; cut spare parts cost by ~20% and raised fleet utilisation by ~15% through predictive failure detection. Earlier raised fleet uptime by 20% and delivery efficiency by 35%.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Operating model, governance and execution rhythm</td><td>Defined the metrics, reporting standards and review cadence for the function; performance, priorities and ROI reviewed with the SVP of Operations on a regular rhythm.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Capacity planning and resource management</td><td>Plan US and EU servicing capacity against deployment demand and set scaling milestones; designed a zero-hours university pilot to absorb seasonal peaks at lower cost than permanent headcount.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Investment prioritisation and business cases</td><td>Build business cases with Finance for new hardware and software investments, valued on fleet utilisation and unit economics, and prioritise the portfolio of initiatives on that basis.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Readiness reviews and lifecycle</td><td>Defined and validated the US servicing model and the readiness milestones for launching new service lines; took new robot hardware from engineering into service operations.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Influencing Engineering, Finance and Operations</td><td>Business cases with Finance, joint OKRs with partner teams, field-to-design forums with engineering, and regular reviews with the SVP of Operations.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Turning complex data into executive narratives</td><td>Integrate data from multiple operational systems in Databricks and Tableau into the recommendations I take to senior leadership.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Roadmap management and scenario planning</td><td>Turned product roadmaps into delivery plans across 5 cross-functional teams; plan capacity against demand, including seasonal peaks. Enterprise-wide roadmap governance would be new scale for me.</td><td><span class="status tr">Building on</span></td></tr>
+        <tr><td>ERM and capacity planning tools</td><td>Configured Jira internally as our planning system, with Databricks and Tableau for analysis. I have not yet used an enterprise portfolio management platform.</td><td><span class="status tr">Building on</span></td></tr>
+        <tr><td>Semiconductor industry and Arm's product range</td><td>My portfolio and capacity work is in autonomous robotics, with a mechanical engineering background. The planning disciplines transfer; the semiconductor product range and its lifecycle are what I'd learn first.</td><td><span class="status tr">Transferable</span></td></tr>
+        <tr class="grp"><th colspan="3" scope="colgroup">Nice to have</th></tr>
+        <tr><td>Technical or engineering background</td><td>BSc Mechanical Engineering and 7+ years in autonomous robotics hardware and hardware/software integration.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Implementing operating models, governance standards and lifecycle frameworks</td><td>Six-pillar operating model, quality standards and technical manuals for refurbishment and repair, and readiness milestones for new service lines.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>Connecting capacity, finance and delivery data into decision frameworks</td><td>The six-pillar framework brings reliability, cost, capacity and delivery data into one view used to prioritise.</td><td><span class="status ok">Proven</span></td></tr>
+        <tr><td>AI-enabled planning, reporting or insight</td><td>Predictive failure detection on telemetry and historical data; AI tools used to automate reporting and support analysis.</td><td><span class="status ok">Proven</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="fw-h">
+  <h2 id="fw-h" data-eyebrow="Operating model">The metrics framework I built</h2>
+  <p class="lede">The operating model I built: six pillars, each with a north star and the supporting metrics that explain it. It is how priorities, capacity and investment are argued at SLT level. <mark class="pm">Highlighted</mark> metrics are the cost, capacity and planning measures.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th scope="col">Pillar</th><th scope="col">North star</th><th scope="col">Supporting metrics</th></tr></thead>
+      <tbody>
+        <tr class="p1"><td>Operational excellence</td><td class="ns">Refurbishment cycle time, SBD rate</td><td class="sub">Refurbishment throughput vs target, service buffer coverage, on-time deployment rate, active fleet %, labour hours per refurb</td></tr>
+        <tr class="p2"><td>Reliability engineering</td><td class="ns">Mean distance between failures, first-time fix rate</td><td class="sub">MTTR and repeat failures, preventive maintenance failure rate, recurrence of known faults</td></tr>
+        <tr class="p3"><td>Financial efficiency</td><td class="ns"><mark class="pm">Cost per refurb unit, spare parts cost</mark></td><td class="sub"><mark class="pm">Parts cost as % of refurb cost, swap time and unit cost vs repair</mark></td></tr>
+        <tr class="p4"><td>Tooling and data</td><td class="ns">Reporting coverage, dashboard adoption</td><td class="sub">KPI dashboards with live data feeds, field data capture rate, Jira ticket-to-resolution cycle time, report delivery vs SLA</td></tr>
+        <tr class="p5"><td>Strategic scaling</td><td class="ns">Fleet uptime, <mark class="pm">scaling milestone hit rate</mark></td><td class="sub">US servicing model defined and validated, hub-and-spoke network efficiency, <mark class="pm">EU/US capacity vs deployment demand</mark></td></tr>
+        <tr class="p6"><td>Cross-functional integration</td><td class="ns">Feedback loop velocity, ops alignment</td><td class="sub"><mark class="pm">Joint OKR coverage</mark>, observation-to-change time, parts availability vs demand, field insights actioned per quarter</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="ap-h">
+  <h2 id="ap-h" data-eyebrow="Approach">How I'd build a roadmap and capacity capability</h2>
+  <p class="lede">My approach to an enterprise planning function, drawing on how I built the operating model at Starship.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th scope="col">Area</th><th scope="col">What I'd put in place</th><th scope="col">Why it matters</th></tr></thead>
+      <tbody>
+        <tr class="p1"><td>Vision &amp; operating model</td><td>One roadmap and capacity standard: what a decision-ready roadmap contains, who owns each part, and which forum decides</td><td class="sub">Roadmaps only drive decisions if every team builds them the same way</td></tr>
+        <tr class="p2"><td>Governance &amp; rhythm</td><td>A predictable cycle of portfolio reviews, capacity checkpoints and Portfolio Board pre-reads</td><td class="sub">Decisions arrive with evidence, on time</td></tr>
+        <tr class="p3"><td>Capacity &amp; scenario planning</td><td>Demand vs capacity by skill and site, with what-if scenarios across staffing, timing and dependencies</td><td class="sub">Trade-offs are visible before commitments are made</td></tr>
+        <tr class="p4"><td>Value-led prioritisation</td><td>Initiatives scored on strategic value, business impact, delivery risk and product outcome</td><td class="sub">Scarce engineering capacity goes to the highest-value work</td></tr>
+        <tr class="p5"><td>Readiness &amp; lifecycle</td><td>The same readiness criteria at every lifecycle gate, and a standard evidence pack for product approvals</td><td class="sub">Approvals rest on consistent evidence</td></tr>
+        <tr class="p6"><td>Data quality &amp; AI insight</td><td>A single source of truth with data quality checks, and AI to automate reporting and flag risks early</td><td class="sub">Leaders spend their time deciding, not reconciling numbers</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="cred-h">
+  <h2 id="cred-h" data-eyebrow="Credentials">Methods, tools and education</h2>
+  <div class="pair" style="margin-top:18px">
+    <dl>
+      <dt>PRINCE2 Foundation</dt><dd>Structured project control and governance</dd>
+      <dt>Lean Six Sigma</dt><dd>Process improvement and measurement</dd>
+      <dt>Databricks, Tableau</dt><dd>Data analysis, dashboards and visualisation</dd>
+      <dt>Claude and other AI tools</dt><dd>Automation, reporting and analysis</dd>
+    </dl>
+    <dl>
+      <dt>Jira, Confluence, GitHub</dt><dd>Jira configured internally as our planning system</dd>
+      <dt>BSc Mechanical Engineering</dt><dd>University of Western Macedonia</dd>
+    </dl>
+  </div>
+</section>
+
+<footer class="band">
+  <p>Get in touch.</p>
+  <ul class="contact" style="margin:0">
+    <li><a href="mailto:tonyreskas@gmail.com">Email me</a></li>
+    <li><a href="https://linkedin.com/in/tony-rreshka">LinkedIn</a></li>
+    <li><a href="tel:+447497388205">07497 388 205</a></li>
+  </ul>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var START = 2018, END = 2026.75, SPAN = END - START;
+  var roles = [
+    { org:"Amazon", title:"Operations Manager, Test Coordinator, Support Engineer", short:"Ops and test coordination", bar:"2018 – 2021", s:2018.37, e:2021.45, dates:"May 2018 – Jun 2021", place:"Cambridge",
+      done:["Directed multi-site programme initiatives","Designed and ran the test management approach across 15 projects, including team training","Increased decision-making efficiency by 20%"] },
+    { org:"Starship Technologies", title:"Robot Service Team Lead", short:"Service team lead", bar:"’21 – ’22", s:2021.67, e:2022.92, dates:"Sep 2021 – Dec 2022", place:"Milton Keynes",
+      done:["Led the service team maintaining the autonomous robot fleet, introducing new tools with structured training","Used fleet data to raise uptime by 20% and operational efficiency by 15%"] },
+    { org:"Starship Technologies", title:"Product Engineer", short:"Product engineer", bar:"’22 – ’24", s:2022.92, e:2024.37, dates:"Dec 2022 – May 2024", place:"Cambridge",
+      done:["Turned product roadmaps into engineering delivery plans across 5 cross-functional teams, improving delivery efficiency by 35%","Drove hardware/software integration of new robot hardware, improving system compliance by 10%","Took new robot hardware from engineering into service operations"] },
+    { org:"Starship Technologies", title:"Director, Servicing Engineering", short:"Director, servicing eng.", bar:"2024 – now", s:2024.37, e:END, current:true, dates:"May 2024 – present", place:"Cambridge",
+      done:["Set the vision and operating model: a six-pillar framework with north star and supporting metrics","Run the governance rhythm: performance, priorities and ROI taken to the SVP of Operations","Predictive failure detection on robot telemetry: ~20% lower spare parts cost, ~15% higher fleet utilisation","Build business cases with Finance for new hardware and software, valued on utilisation and unit economics","Plan US and EU capacity against deployment demand; zero-hours pilot to absorb seasonal peaks","Led the Technical Toolbox programme: 3 software and 3 servicing engineers, ~12 months, 100+ users"] }
+  ];
+  var pct = function(y){ return ((y - START) / SPAN * 100).toFixed(3) + "%"; };
+  var sched = document.getElementById("sched"), detail = document.getElementById("detail");
+
+  var axis = '<div class="axis"><div></div><div class="ticks">';
+  for (var y = START; y <= 2026; y++) axis += '<span class="tick' + (y % 2 ? ' odd' : '') + '" style="left:' + pct(y) + '">' + y + '</span>';
+  axis += '</div></div>';
+  var rows = roles.map(function(r, i){
+    var today = r.current ? '<span class="today" style="left:' + pct(2026.73) + '"></span>' : '';
+    return '<div class="row"><div class="label"><b>' + r.short.replace(/^./, function(c){return c.toUpperCase();}) + '</b><span>' + r.org + '</span></div>' +
+      '<div class="track"><button class="bar' + (r.current ? ' current' : '') + (r.org === 'Amazon' ? ' amz' : '') + '" data-i="' + i + '" aria-pressed="false" style="--i:' + i + ';left:' + pct(r.s) + ';width:calc(' + pct(r.e) + ' - ' + pct(r.s) + ')" aria-label="' + r.title + ', ' + r.dates + '">' + r.bar + '</button>' + today + '</div></div>';
+  }).join("");
+  sched.innerHTML = axis + rows;
+
+  function show(i){
+    var r = roles[i];
+    sched.querySelectorAll(".bar").forEach(function(b){ b.setAttribute("aria-pressed", String(+b.dataset.i === i)); });
+    detail.innerHTML = '<div><h3>' + r.title + '</h3><p class="meta">' + r.org + ', ' + r.place + ' &nbsp;|&nbsp; ' + r.dates + '</p><ul>' +
+      r.done.map(function(d){ return '<li>' + d + '</li>'; }).join("") + '</ul></div>';
+  }
+  sched.addEventListener("click", function(e){ var b = e.target.closest(".bar"); if (b) show(+b.dataset.i); });
+  show(3);
+})();
+</script>
+<script>
+(function(){
+  var INIT=[
+    {name:"Predictive failure detection v2",value:9,risk:"Medium",fte:6,start:0,len:3},
+    {name:"Next-gen hardware readiness",value:8,risk:"High",fte:5,start:1,len:3},
+    {name:"US servicing scale-up",value:8,risk:"Low",fte:4,start:0,len:4},
+    {name:"Refurbishment line automation",value:7,risk:"Medium",fte:4,start:1,len:3},
+    {name:"Spare parts demand forecasting",value:6,risk:"Low",fte:3,start:0,len:2},
+    {name:"AI reporting automation",value:6,risk:"Low",fte:2,start:0,len:2},
+    {name:"Technical Toolbox v2",value:5,risk:"Medium",fte:3,start:2,len:2}
+  ];
+  var RF={Low:1,Medium:0.85,High:0.7}, NQ=6;
+  var st={cap:22,dem:0,dly:-1,dq:1,rule:"score"};
+  var $=function(id){return document.getElementById(id);};
+  var sel=$("dly"); sel.innerHTML='<option value="-1">None</option>'+INIT.map(function(x,i){return '<option value="'+i+'">'+x.name+'</option>';}).join("");
+  function qLabel(a,b){return a===b?"Q"+(a+1):"Q"+(a+1)+"–Q"+(b+1);}
+  function run(){
+    var items=INIT.map(function(x,i){
+      var f=Math.round(x.fte*(1+st.dem/100)*2)/2, s0=x.start+(st.dly===i?st.dq:0);
+      var score=x.value*RF[x.risk]/(f*x.len)*10;
+      return {i:i,name:x.name,value:x.value,risk:x.risk,fte:f,start:s0,end:Math.min(NQ-1,s0+x.len-1),score:score};
+    });
+    var order=items.slice();
+    if(st.rule==="score") order.sort(function(a,b){return b.score-a.score;});
+    else if(st.rule==="value") order.sort(function(a,b){return b.value-a.value||a.i-b.i;});
+    var used=new Array(NQ).fill(0), def=new Array(NQ).fill(0), funded=[], deferred=[];
+    order.forEach(function(x){
+      var ok=true; for(var q=x.start;q<=x.end;q++) if(used[q]+x.fte>st.cap+1e-9) ok=false;
+      if(ok){ for(q=x.start;q<=x.end;q++) used[q]+=x.fte; x.ok=true; funded.push(x);} else { for(q=x.start;q<=x.end;q++) def[q]+=x.fte; x.ok=false; deferred.push(x);} 
+    });
+    var totV=items.reduce(function(a,x){return a+x.value;},0), funV=funded.reduce(function(a,x){return a+x.value;},0);
+    var peak=Math.max.apply(null,used), tot=used.map(function(u,q){return u+def[q];}), gap=Math.max(0,Math.max.apply(null,tot)-st.cap);
+    $("capOut").textContent=st.cap+" FTE"; $("demOut").textContent=(st.dem>0?"+":"")+st.dem+"%";
+    $("kFund").textContent=funded.length+" of "+items.length;
+    $("kVal").textContent=Math.round(funV/totV*100)+"%";
+    $("kUtil").textContent=Math.round(peak/st.cap*100)+"%";
+    $("kGap").textContent=gap>0?"+"+(Math.round(gap*2)/2)+" FTE":"None";
+    var v;
+    if(!deferred.length){ v="Everything fits. The busiest quarter still has "+(Math.round((st.cap-peak)*2)/2)+" FTE spare: room to pull work forward or absorb risk."; }
+    else {
+      var best=deferred.slice().sort(function(a,b){return b.score-a.score;})[0], need=0;
+      for(var q=best.start;q<=best.end;q++) need=Math.max(need,used[q]+best.fte-st.cap);
+      v="At "+st.cap+" FTE, "+funded.length+" of "+items.length+" initiatives fit and "+Math.round(funV/totV*100)+"% of portfolio value is delivered. Deferred: "+deferred.map(function(x){return x.name;}).join(", ")+". The highest-value unlock is "+best.name+", which needs "+(Math.round(need*2)/2)+" more FTE in "+qLabel(best.start,best.end)+", or a re-sequence of lower-scoring work.";
+    }
+    $("verdict").textContent=v;
+    var rank=order.slice().sort(function(a,b){return (b.ok-a.ok)||order.indexOf(a)-order.indexOf(b);});
+    $("rows").innerHTML=order.map(function(x,k){
+      return '<tr><td>'+(k+1)+'</td><td>'+x.name+'</td><td>'+qLabel(x.start,x.end)+'</td><td>'+x.fte+'</td><td>'+x.value+'</td><td>'+x.risk+'</td><td>'+x.score.toFixed(1)+'</td><td><span class="st"><i style="background:var('+(x.ok?'--s-fund':'--s-def')+')"></i>'+(x.ok?'Funded':'Deferred')+'</span></td></tr>';
+    }).join("");
+    draw(used,def,items);
+  }
+  function draw(used,def,items){
+    var wrapEl=document.getElementById('chart'), W=Math.max(300,Math.round(wrapEl.clientWidth||900)), H=W<560?230:280,L=34,R=14,T=16,B=26, iw=W-L-R, ih=H-T-B;
+    var maxY=Math.max(40,Math.ceil(Math.max.apply(null,used.map(function(u,q){return u+def[q];}).concat([st.cap]))/10)*10);
+    var y=function(v){return T+ih-v/maxY*ih;}, bw=iw/NQ, w=Math.min(46,bw*0.5);
+    var g='';
+    for(var t=0;t<=maxY;t+=10) g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(t)+'" y2="'+y(t)+'" stroke="var(--grid)" stroke-width="1"/><text class="tick" x="'+(L-6)+'" y="'+(y(t)+4)+'" text-anchor="end">'+t+'</text>';
+    function rect(x,y0,h,fill,topRound){
+      if(h<=0) return '';
+      var r=topRound?Math.min(4,h):0, yy=y0;
+      return '<path d="M'+x+','+(yy+h)+' V'+(yy+r)+' Q'+x+','+yy+' '+(x+r)+','+yy+' H'+(x+w-r)+' Q'+(x+w)+','+yy+' '+(x+w)+','+(yy+r)+' V'+(yy+h)+' Z" fill="'+fill+'"/>';
+    }
+    for(var q=0;q<NQ;q++){
+      var x=L+bw*q+(bw-w)/2, u=used[q], d=def[q];
+      var hu=ih*u/maxY, hd=ih*d/maxY, gap=(u>0&&d>0)?2:0;
+      g+=rect(x,y(u),hu,'var(--s-fund)',d<=0);
+      if(d>0) g+=rect(x,y(u+d),Math.max(0,hd-gap),'var(--s-def)',true);
+      var who=items.filter(function(it){return it.start<=q&&it.end>=q;});
+      g+='<rect class="hit" tabindex="0" data-q="'+q+'" x="'+(L+bw*q)+'" y="'+T+'" width="'+bw+'" height="'+ih+'" aria-label="Q'+(q+1)+': '+u+' FTE funded, '+d+' deferred, capacity '+st.cap+'"/><rect class="ring" x="'+(x-3)+'" y="'+(y(u+d)-3)+'" width="'+(w+6)+'" height="'+(ih*(u+d)/maxY+3)+'" rx="5" fill="none" stroke="none" pointer-events="none"/>';
+      g+='<text class="tick" x="'+(L+bw*q+bw/2)+'" y="'+(H-8)+'" text-anchor="middle">Q'+(q+1)+'</text>';
+    }
+    g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(st.cap)+'" y2="'+y(st.cap)+'" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text class="cap-label" x="'+(W-R)+'" y="'+(y(st.cap)-6)+'" text-anchor="end">Capacity '+st.cap+' FTE</text>';
+    var wrap=$("chart"), tip=$("tip");
+    var old=wrap.querySelector("svg"); if(old) old.remove();
+    wrap.insertAdjacentHTML("afterbegin",'<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Funded and deferred engineering demand by quarter against capacity">'+g+'</svg>');
+    var svg=wrap.querySelector("svg");
+    function show(e){
+      var q=+e.target.dataset.q, who=items.filter(function(it){return it.start<=q&&it.end>=q;});
+      tip.innerHTML='<b>Q'+(q+1)+'</b> · capacity '+st.cap+' FTE<br>Funded: '+used[q]+' FTE · Deferred: '+def[q]+' FTE<br>'+who.map(function(it){return (it.ok?'✓ ':'✕ ')+it.name+' ('+it.fte+')';}).join('<br>');
+      var ring=e.target.nextElementSibling.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+      var left=ring.left-wr.left+ring.width/2; left=Math.max(130,Math.min(wr.width-130,left));
+      tip.style.left=left+"px"; tip.style.top=(ring.top-wr.top-8)+"px"; tip.classList.add("on");
+    }
+    function hide(){tip.classList.remove("on");}
+    svg.querySelectorAll(".hit").forEach(function(h){h.addEventListener("mouseenter",show);h.addEventListener("focus",show);h.addEventListener("mouseleave",hide);h.addEventListener("blur",hide);});
+  }
+  $("cap").addEventListener("input",function(e){st.cap=+e.target.value;run();});
+  $("dem").addEventListener("input",function(e){st.dem=+e.target.value;run();});
+  sel.addEventListener("change",function(e){st.dly=+e.target.value;run();});
+  function seg(id,key,attr,num){$(id).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;$(id).querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b));});st[key]=num?+b.dataset[attr]:b.dataset[attr];run();});}
+  seg("dlyQ","dq","q",true); seg("rule","rule","r",false);
+  var rt; window.addEventListener("resize",function(){clearTimeout(rt); rt=setTimeout(run,120);});
+  run();
+})();
+</script>
+</body>
+</html>
